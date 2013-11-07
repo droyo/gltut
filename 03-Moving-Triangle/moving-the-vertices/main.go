@@ -1,3 +1,5 @@
+// moving-the-vertices loops a triangle around the screen by updating
+// a vertex buffer. It is an implementation of http://arcsynthesis.org/gltut/Positioning/Tutorial%2003.html
 package main
 
 import (

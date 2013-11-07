@@ -1,3 +1,5 @@
+// overlap-depth displays two overlapping 3D objects. It is an implementation of
+// http://arcsynthesis.org/gltut/Positioning/Tut05%20Overlap%20and%20Depth%20Buffering.html
 package main
 
 import (

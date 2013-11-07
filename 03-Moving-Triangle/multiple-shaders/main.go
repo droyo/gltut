@@ -1,3 +1,5 @@
+// multiple-shaders moves a triangle while cycling its color.
+// It is an implementation of http://arcsynthesis.org/gltut/Positioning/Tut03%20Multiple%20Shaders.html
 package main
 
 import (

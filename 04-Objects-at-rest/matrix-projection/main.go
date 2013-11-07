@@ -1,3 +1,6 @@
+// matrix-projection displays a 3D prism using a matrix to calculate
+// the clip-space coordinates. It is an implementation of 
+// http://arcsynthesis.org/gltut/Positioning/Tut04%20The%20Matrix%20Has%20You.html
 package main
 
 import (

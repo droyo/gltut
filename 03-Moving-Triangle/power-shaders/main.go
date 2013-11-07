@@ -1,3 +1,5 @@
+// power-shaders moves a triangle using GLSL to calculate its offset.
+// it is an implementation of http://arcsynthesis.org/gltut/Positioning/Tut03%20More%20Power%20To%20The%20Shaders.html
 package main
 
 import (

@@ -1,3 +1,5 @@
+// base-vertex renders an object using DrawElementsBaseVertex.
+// It is an implementation of http://arcsynthesis.org/gltut/Positioning/Tut05%20Optimization%20Base%20Vertex.html
 package main
 
 import (

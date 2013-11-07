@@ -1,3 +1,5 @@
+// vertex-attributes draws a triangle with colors in stored in a buffer.
+// It is an implementation of http://arcsynthesis.org/gltut/Basics/Tut02%20Vertex%20Attributes.html
 package main
 
 import (

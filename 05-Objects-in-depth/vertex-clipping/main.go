@@ -1,3 +1,5 @@
+// vertex-clipping illustrates OpenGL's clipping of objects leaving camera space.
+// It is an implementation of http://arcsynthesis.org/gltut/Positioning/Tut05%20Boundaries%20and%20Clipping.html
 package main
 
 import (

@@ -1,3 +1,5 @@
+// perspective-projection displays a 3D prism with perspective projection.
+// It is an implementation of http://arcsynthesis.org/gltut/Positioning/Tut04%20Perspective%20Projection.html
 package main
 
 import (

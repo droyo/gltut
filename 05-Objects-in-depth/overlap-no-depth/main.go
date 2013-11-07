@@ -1,3 +1,5 @@
+// overlap-no-depth displays two objects without depth buffering enabled.
+// It is an implementation of http://arcsynthesis.org/gltut/Positioning/Tutorial%2005.html
 package main
 
 import (

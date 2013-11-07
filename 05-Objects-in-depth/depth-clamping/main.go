@@ -1,3 +1,5 @@
+// depth-clamping shows how to handle objects entering or leaving camera space.
+// It is an implementation of http://arcsynthesis.org/gltut/Positioning/Tut05%20Depth%20Clamping.html
 package main
 
 import (

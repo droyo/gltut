@@ -1,3 +1,5 @@
+// a-better-way draws a triangle that loops around the window.
+// It is an implementation of http://arcsynthesis.org/gltut/Positioning/Tut03%20A%20Better%20Way.html
 package main
 
 import (

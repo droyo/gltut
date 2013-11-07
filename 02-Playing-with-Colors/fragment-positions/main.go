@@ -1,3 +1,5 @@
+// fragment-positions shades a triangle based on the position
+// of each pixel. It is an implementation of http://arcsynthesis.org/gltut/Basics/Tutorial%2002.html
 package main
 
 import (

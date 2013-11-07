@@ -1,3 +1,5 @@
+// hello-triangle draws a white triangle on the screen.
+// It is an implmentation of http://arcsynthesis.org/gltut/Basics/Tutorial%2001.html
 package main
 
 import (

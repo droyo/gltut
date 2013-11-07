@@ -1,3 +1,5 @@
+// aspect-ratio displays a 3D prism, perserving the aspect ratio.
+// It is an implementation of http://arcsynthesis.org/gltut/Positioning/Tut04%20Aspect%20of%20the%20World.html
 package main
 
 import (
