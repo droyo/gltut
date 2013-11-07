@@ -2,13 +2,12 @@ package main
 
 import (
 	"log"
-	"time"
 	"aqwari.net/exp/gl"
 	"aqwari.net/exp/display"
 )
 
 var config = display.Config{
-	"Title":          "Perspective Projection",
+	"Title":          "Aspect Ratio",
 	"Geometry":       "500x500",
 	"OpenGL Version": "3.2",
 }
@@ -20,10 +19,14 @@ in vec4 position;
 in vec4 color;
 
 smooth out vec4 theColor;
-uniform vec2 offset;
 
-void main() {
-	gl_Position = position + vec4(offset, 0, 0);
+uniform vec2 offset;
+uniform mat4 perspectiveMatrix;
+
+void main()
+{
+	vec4 camera = position + vec4(offset, 0, 0);
+	gl_Position = perspectiveMatrix * camera;
 	theColor = color;
 }
 `)
@@ -55,53 +58,53 @@ func main() {
 	gl.FrontFace(gl.CW)
 	
 	vertexData := []float32{
-		0.25, 0.25, 0.75, 1.0,
-		0.25, -0.25, 0.75, 1.0,
-		-0.25, 0.25, 0.75, 1.0,
+		0.25, 0.25, -1.25, 1.0,
+		0.25, -0.25, -1.25, 1.0,
+		-0.25, 0.25, -1.25, 1.0,
 
-		0.25, -0.25, 0.75, 1.0,
-		-0.25, -0.25, 0.75, 1.0,
-		-0.25, 0.25, 0.75, 1.0,
+		0.25, -0.25, -1.25, 1.0,
+		-0.25, -0.25, -1.25, 1.0,
+		-0.25, 0.25, -1.25, 1.0,
 
-		0.25, 0.25, -0.75, 1.0,
-		-0.25, 0.25, -0.75, 1.0,
-		0.25, -0.25, -0.75, 1.0,
+		0.25, 0.25, -2.75, 1.0,
+		-0.25, 0.25, -2.75, 1.0,
+		0.25, -0.25, -2.75, 1.0,
 
-		0.25, -0.25, -0.75, 1.0,
-		-0.25, 0.25, -0.75, 1.0,
-		-0.25, -0.25, -0.75, 1.0,
+		0.25, -0.25, -2.75, 1.0,
+		-0.25, 0.25, -2.75, 1.0,
+		-0.25, -0.25, -2.75, 1.0,
 
-		-0.25, 0.25, 0.75, 1.0,
-		-0.25, -0.25, 0.75, 1.0,
-		-0.25, -0.25, -0.75, 1.0,
+		-0.25, 0.25, -1.25, 1.0,
+		-0.25, -0.25, -1.25, 1.0,
+		-0.25, -0.25, -2.75, 1.0,
 
-		-0.25, 0.25, 0.75, 1.0,
-		-0.25, -0.25, -0.75, 1.0,
-		-0.25, 0.25, -0.75, 1.0,
+		-0.25, 0.25, -1.25, 1.0,
+		-0.25, -0.25, -2.75, 1.0,
+		-0.25, 0.25, -2.75, 1.0,
 
-		0.25, 0.25, 0.75, 1.0,
-		0.25, -0.25, -0.75, 1.0,
-		0.25, -0.25, 0.75, 1.0,
+		0.25, 0.25, -1.25, 1.0,
+		0.25, -0.25, -2.75, 1.0,
+		0.25, -0.25, -1.25, 1.0,
 
-		0.25, 0.25, 0.75, 1.0,
-		0.25, 0.25, -0.75, 1.0,
-		0.25, -0.25, -0.75, 1.0,
+		0.25, 0.25, -1.25, 1.0,
+		0.25, 0.25, -2.75, 1.0,
+		0.25, -0.25, -2.75, 1.0,
 
-		0.25, 0.25, -0.75, 1.0,
-		0.25, 0.25, 0.75, 1.0,
-		-0.25, 0.25, 0.75, 1.0,
+		0.25, 0.25, -2.75, 1.0,
+		0.25, 0.25, -1.25, 1.0,
+		-0.25, 0.25, -1.25, 1.0,
 
-		0.25, 0.25, -0.75, 1.0,
-		-0.25, 0.25, 0.75, 1.0,
-		-0.25, 0.25, -0.75, 1.0,
+		0.25, 0.25, -2.75, 1.0,
+		-0.25, 0.25, -1.25, 1.0,
+		-0.25, 0.25, -2.75, 1.0,
 
-		0.25, -0.25, -0.75, 1.0,
-		-0.25, -0.25, 0.75, 1.0,
-		0.25, -0.25, 0.75, 1.0,
+		0.25, -0.25, -2.75, 1.0,
+		-0.25, -0.25, -1.25, 1.0,
+		0.25, -0.25, -1.25, 1.0,
 
-		0.25, -0.25, -0.75, 1.0,
-		-0.25, -0.25, -0.75, 1.0,
-		-0.25, -0.25, 0.75, 1.0,
+		0.25, -0.25, -2.75, 1.0,
+		-0.25, -0.25, -2.75, 1.0,
+		-0.25, -0.25, -1.25, 1.0,
 
 		0.0, 0.0, 1.0, 1.0,
 		0.0, 0.0, 1.0, 1.0,
@@ -185,26 +188,42 @@ func main() {
 	defer gl.DeleteBuffers(buffers)
 	
 	gl.BindBuffer(gl.ARRAY_BUFFER, buffers[0])
-	gl.BufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW)
+	err = gl.BufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW)
+	if err != nil {
+		log.Fatal(err)
+	}
 	
-	arr := gl.GenVertexArrays(1)
-	gl.BindVertexArray(arr[0])
+	vertArray := gl.GenVertexArrays(1)
+	gl.BindVertexArray(vertArray[0])
 	
 	pos, _ := gl.GetAttribLocation(prog, "position")
 	col, _ := gl.GetAttribLocation(prog, "color")
 	gl.EnableVertexAttribArray(pos)
 	gl.EnableVertexAttribArray(col)
 	
+	gl.VertexAttribPointer(pos, 4, gl.Float32, false, 0, 0)
+	gl.VertexAttribPointer(col, 4, gl.Float32, false, 0, 4*uintptr(len(vertexData))/2)
+	
 	offset, _ := gl.GetUniformLocation(prog, "offset")
-	gl.Uniformf(offset, 0.5, 0.25)
-	
-	gl.VertexAttribPointer(pos, 4, gl.Float, false, 0, 0)
-	gl.VertexAttribPointer(col, 4, gl.Float, false, 0, uintptr(len(vertexData))/2 * 4)
-	
-	clock := time.Tick(time.Second / 30)
+	perspective, _ := gl.GetUniformLocation(prog, "perspectiveMatrix")
+	var (
+		frustum float32 = 1.0
+		zNear float32 = 1.0
+		zFar float32 = 3.0
+	)
+	matrix := [16]float32{
+		0:  frustum,
+		5:  frustum,
+		10: (zFar + zNear) / (zNear - zFar),
+		14: (2 * zFar * zNear) / (zNear - zFar),
+		11: -1.0,
+	}
+	gl.Uniformf(offset, 1.5, 0.5)
+	gl.UniformMatrix4fv(perspective, false, matrix[:])
 	gl.Clear(gl.COLOR_BUFFER_BIT)
+	gl.DrawArrays(gl.TRIANGLES, 0, 36)
 Loop:
-	for _ = range clock {
+	for {
 		select {
 		case ev := <-win.Event:
 			switch ev := ev.(type) {
@@ -212,14 +231,20 @@ Loop:
 				if ev.Code == display.KeyEscape {
 					break Loop
 				}
+			case display.Damage:
+				gl.Clear(gl.COLOR_BUFFER_BIT)
+				gl.DrawArrays(gl.TRIANGLES, 0, 36)
 			case display.Resize:
+				matrix[0] = frustum / (float32(ev.Width) / float32(ev.Height))
+				matrix[5] = frustum
+				gl.UniformMatrix4fv(perspective, false, matrix[:])
 				gl.Viewport(0, 0, ev.Width, ev.Height)
+				gl.Clear(gl.COLOR_BUFFER_BIT)
+				gl.DrawArrays(gl.TRIANGLES, 0, 36)
+				win.Flip()
 			}
 		default:
-			gl.Clear(gl.COLOR_BUFFER_BIT)
-			gl.DrawArrays(gl.TRIANGLES, 0, 36)
-			win.Flip()
-			win.CheckEvent()
+			win.WaitEvent()
 		}
 	}
 }

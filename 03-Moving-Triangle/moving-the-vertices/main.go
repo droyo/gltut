@@ -3,12 +3,13 @@ package main
 import (
 	"log"
 	"time"
+	"math"
 	"aqwari.net/exp/gl"
 	"aqwari.net/exp/display"
 )
 
 var config = display.Config{
-	"Title":          "A Better Way",
+	"Title":          "Moving Triangle",
 	"Geometry":       "500x500",
 	"OpenGL Version": "3.2",
 }
@@ -16,15 +17,9 @@ var config = display.Config{
 var vertShader = []byte(
 `#version 150
 
-in vec2 position;
-uniform float period;
-uniform float time;
-
+in vec4 position;
 void main() {
-	float scale = 3.14159 * 2 / period;
-	float cur = mod(time, period);
-	vec2 offset = vec2(cos(cur * scale) / 2, sin(cur * scale) / 2);
-	gl_Position = vec4(position + offset, 0, 1);
+	gl_Position = position;
 }
 `)
 
@@ -32,17 +27,8 @@ var fragShader = []byte(
 `#version 150
 
 out vec4 outColor;
-
-uniform float fragPeriod;
-uniform float time;
-
-const vec4 firstColor = vec4(1, 1, 1, 1);
-const vec4 secondColor = vec4(0, 1, 0, 1);
-
 void main() {
-	float cur = mod(time, fragPeriod);
-	float curLerp = cur / fragPeriod;
-	outColor = mix(firstColor, secondColor, curLerp);
+	outColor = vec4(1,1,1,1);
 }`)
 
 func main() {
@@ -58,9 +44,9 @@ func main() {
 	gl.ClearColor(0, 0, 0, 0)
 	
 	vertexData := []float32 {
-		 0.0,    0.25,
-		 0.25, -0.366,
-		-0.25, -0.366,
+		 0.0,    0.25, 0.0, 1.0,
+		 0.25, -0.366, 0.0, 1.0,
+		-0.25, -0.366, 0.0, 1.0,
 	}
 	
 	prog := gl.CreateProgram()
@@ -104,15 +90,9 @@ func main() {
 	pos, _ := gl.GetAttribLocation(prog, "position")
 	gl.EnableVertexAttribArray(pos)
 	defer gl.DisableVertexAttribArray(pos)
-	gl.VertexAttribPointer(pos, 2, gl.Float, false, 0, 0)
-	
-	glTime, _ := gl.GetUniformLocation(prog, "time")
-	glPeriod, _ := gl.GetUniformLocation(prog, "period")
-	glFragPeriod, _ := gl.GetUniformLocation(prog, "fragPeriod")
+	gl.VertexAttribPointer(pos, 4, gl.Float32, false, 0, 0)
 	
 	clock := time.Tick(time.Second / 60)
-	gl.Uniformf(glPeriod, float32((time.Second * 4).Seconds()))
-	gl.Uniformf(glFragPeriod, float32((time.Second * 2).Seconds()))
 	start := time.Now()
 	
 	gl.Clear(gl.COLOR_BUFFER_BIT)
@@ -130,10 +110,31 @@ Loop:
 			}
 		default:
 		}
+		rotate(vertexData, start)
+		gl.BufferSubData(gl.ARRAY_BUFFER, 0, vertexData)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
-		gl.Uniformf(glTime, float32(time.Since(start).Seconds()))
 		gl.DrawArrays(gl.TRIANGLES, 0, 3)
 		win.Flip()
 		win.CheckEvent()
 	}
+}
+
+func rotate(points []float32, start time.Time) {
+	dx, dy := offset(start)
+	for i := 0 ; i < len(points); i += 4 {
+		points[i] += dx
+		points[i+1] += dy
+	}
+}
+
+func offset(start time.Time) (dx float32, dy float32) {
+	π := float64(math.Pi)
+	period := time.Second * 2
+	scale := 2*π / period.Seconds()
+	elapsed := time.Since(start)
+	pos := (elapsed % period).Seconds()
+	
+	dx = float32(math.Cos(pos * scale) / 50)
+	dy = float32(math.Sin(pos * scale) / 50)
+	return
 }

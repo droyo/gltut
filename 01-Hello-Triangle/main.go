@@ -85,7 +85,7 @@ func main() {
 	gl.BindVertexArray(arr[0])
 	
 	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointer(0, 4, gl.Float, false, 0, 0)
+	gl.VertexAttribPointer(0, 4, gl.Float32, false, 0, 0)
 	
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 	win.Flip()

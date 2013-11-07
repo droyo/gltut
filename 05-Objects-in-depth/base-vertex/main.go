@@ -204,8 +204,8 @@ func main() {
 	gl.BindVertexArray(vao[0])
 	gl.EnableVertexAttribArray(pos)
 	gl.EnableVertexAttribArray(col)
-	gl.VertexAttribPointer(pos, 3, gl.Float, false, 0, 0)
-	gl.VertexAttribPointer(col, 4, gl.Float, false, 0, 4 * 3 * 36)
+	gl.VertexAttribPointer(pos, 3, gl.Float32, false, 0, 0)
+	gl.VertexAttribPointer(col, 4, gl.Float32, false, 0, 4 * 3 * 36)
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, buf[1])
 	
 	offset, _ := gl.GetUniformLocation(prog, "offset")

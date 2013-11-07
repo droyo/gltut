@@ -9,7 +9,7 @@ import (
 )
 
 var config = display.Config{
-	"Title":          "Moving Triangle",
+	"Title":          "A Better Way",
 	"Geometry":       "500x500",
 	"OpenGL Version": "3.2",
 }
@@ -17,9 +17,11 @@ var config = display.Config{
 var vertShader = []byte(
 `#version 150
 
-in vec4 position;
+in vec2 position;
+uniform vec2 offset;
+
 void main() {
-	gl_Position = position;
+	gl_Position = vec4(position + offset, 0, 1);
 }
 `)
 
@@ -44,9 +46,9 @@ func main() {
 	gl.ClearColor(0, 0, 0, 0)
 	
 	vertexData := []float32 {
-		 0.0,    0.25, 0.0, 1.0,
-		 0.25, -0.366, 0.0, 1.0,
-		-0.25, -0.366, 0.0, 1.0,
+		 0.0,    0.25,
+		 0.25, -0.366,
+		-0.25, -0.366,
 	}
 	
 	prog := gl.CreateProgram()
@@ -90,7 +92,9 @@ func main() {
 	pos, _ := gl.GetAttribLocation(prog, "position")
 	gl.EnableVertexAttribArray(pos)
 	defer gl.DisableVertexAttribArray(pos)
-	gl.VertexAttribPointer(pos, 4, gl.Float, false, 0, 0)
+	gl.VertexAttribPointer(pos, 2, gl.Float32, false, 0, 0)
+	
+	offset, _ := gl.GetUniformLocation(prog, "offset")
 	
 	clock := time.Tick(time.Second / 60)
 	start := time.Now()
@@ -110,31 +114,23 @@ Loop:
 			}
 		default:
 		}
-		rotate(vertexData, start)
-		gl.BufferSubData(gl.ARRAY_BUFFER, 0, vertexData)
 		gl.Clear(gl.COLOR_BUFFER_BIT)
+		dx, dy := computeOffset(start)
+		gl.Uniformf(offset, dx, dy)
 		gl.DrawArrays(gl.TRIANGLES, 0, 3)
 		win.Flip()
 		win.CheckEvent()
 	}
 }
 
-func rotate(points []float32, start time.Time) {
-	dx, dy := offset(start)
-	for i := 0 ; i < len(points); i += 4 {
-		points[i] += dx
-		points[i+1] += dy
-	}
-}
-
-func offset(start time.Time) (dx float32, dy float32) {
+func computeOffset(start time.Time) (dx float32, dy float32) {
 	π := float64(math.Pi)
 	period := time.Second * 2
 	scale := 2*π / period.Seconds()
 	elapsed := time.Since(start)
 	pos := (elapsed % period).Seconds()
 	
-	dx = float32(math.Cos(pos * scale) / 50)
-	dy = float32(math.Sin(pos * scale) / 50)
+	dx = float32(math.Cos(pos * scale) / 2)
+	dy = float32(math.Sin(pos * scale) / 2)
 	return
 }

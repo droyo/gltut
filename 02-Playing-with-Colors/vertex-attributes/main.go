@@ -12,23 +12,27 @@ var config = display.Config {
 }
 
 var vertShader = []byte(
-`#version 150 core
+`#version 150
 
 in vec4 position;
+in vec4 color;
+
+smooth out vec4 theColor;
+
 void main() {
 	gl_Position = position;
+	theColor = color;
 }
 `)
 
 var fragShader = []byte(
-`#version 150 core
+`#version 150
 
-out vec4 color;
+smooth in vec4 theColor;
+out vec4 outColor;
+
 void main() {
-	float lerpValue = gl_FragCoord.y / 500.0f;
-	
-	color = mix(vec4(1.0f, 1.0f, 1.0f, 1.0f),
-		vec4(0.2f, 0.2f, 0.2f, 1.0f), lerpValue);
+	outColor = theColor;
 }`)
 
 func main() {
@@ -43,10 +47,13 @@ func main() {
 	
 	gl.ClearColor(0, 0, 0, 0)
 	
-	triPoints := []float32 {
-		0.75, 0.75, 0.0, 1.0,
-		0.75, -0.75, 0.0, 1.0,
-		-0.75, -0.75, 0.0, 1.0,
+	vertexData := []float32 {
+		 0.0,    0.5, 0.0, 1.0,
+		 0.5, -0.366, 0.0, 1.0,
+		-0.5, -0.366, 0.0, 1.0,
+		 1.0,    0.0, 0.0, 1.0,
+		 0.0,    1.0, 0.0, 1.0,
+		 0.0,    0.0, 1.0, 1.0,
 	}
 	
 	prog := gl.CreateProgram()
@@ -82,13 +89,18 @@ func main() {
 	defer gl.DeleteBuffers(buffers)
 	
 	gl.BindBuffer(gl.ARRAY_BUFFER, buffers[0])
-	gl.BufferData(gl.ARRAY_BUFFER, triPoints, gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW)
 	
 	arr := gl.GenVertexArrays(1)
 	gl.BindVertexArray(arr[0])
 	
-	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointer(0, 4, gl.Float, false, 0, 0)
+	pos, _ := gl.GetAttribLocation(prog, "position")
+	col, _ := gl.GetAttribLocation(prog, "color")
+	
+	gl.EnableVertexAttribArray(pos)
+	gl.EnableVertexAttribArray(col)
+	gl.VertexAttribPointer(pos, 4, gl.Float32, false, 0, 0)
+	gl.VertexAttribPointer(col, 4, gl.Float32, false, 0, 4*12)
 	
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 	win.Flip()

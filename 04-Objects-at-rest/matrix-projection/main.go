@@ -7,7 +7,7 @@ import (
 )
 
 var config = display.Config{
-	"Title":          "Perspective Projection",
+	"Title":          "Matrix Projection",
 	"Geometry":       "500x500",
 	"OpenGL Version": "3.2",
 }
@@ -21,25 +21,13 @@ in vec4 color;
 smooth out vec4 theColor;
 
 uniform vec2 offset;
-uniform float zNear;
-uniform float zFar;
-uniform float frustumScale;
-
+uniform mat4 perspectiveMatrix;
 
 void main()
 {
-        vec4 cameraPos = position + vec4(offset, 0, 0);
-        vec4 clipPos;
-        
-        clipPos.xy = cameraPos.xy * frustumScale;
-        
-        clipPos.z = cameraPos.z * (zNear + zFar) / (zNear - zFar);
-        clipPos.z += 2 * zNear * zFar / (zNear - zFar);
-        
-        clipPos.w = -cameraPos.z;
-        
-        gl_Position = clipPos;
-        theColor = color;
+	vec4 camera = position + vec4(offset, 0, 0);
+	gl_Position = perspectiveMatrix * camera;
+	theColor = color;
 }
 `)
 
@@ -165,8 +153,7 @@ func main() {
 		0.0, 1.0, 1.0, 1.0,
 		0.0, 1.0, 1.0, 1.0,
 		0.0, 1.0, 1.0, 1.0,
-
-}
+	}
 	
 	prog := gl.CreateProgram()
 	defer gl.DeleteProgram(prog)
@@ -214,19 +201,25 @@ func main() {
 	gl.EnableVertexAttribArray(pos)
 	gl.EnableVertexAttribArray(col)
 	
-	gl.VertexAttribPointer(pos, 4, gl.Float, false, 0, 0)
-	gl.VertexAttribPointer(col, 4, gl.Float, false, 0, 4*uintptr(len(vertexData))/2)
+	gl.VertexAttribPointer(pos, 4, gl.Float32, false, 0, 0)
+	gl.VertexAttribPointer(col, 4, gl.Float32, false, 0, 4*uintptr(len(vertexData))/2)
 	
 	offset, _ := gl.GetUniformLocation(prog, "offset")
-	frustum, _ := gl.GetUniformLocation(prog, "frustumScale")
-	zNear, _ := gl.GetUniformLocation(prog, "zNear")
-	zFar, _ := gl.GetUniformLocation(prog, "zFar")
-	
+	perspective, _ := gl.GetUniformLocation(prog, "perspectiveMatrix")
+	var (
+		frustum float32 = 1.0
+		zNear float32 = 1.0
+		zFar float32 = 3.0
+	)
+	matrix := [16]float32{
+		0:  frustum,
+		5:  frustum,
+		10: (zFar + zNear) / (zNear - zFar),
+		14: (2 * zFar * zNear) / (zNear - zFar),
+		11: -1.0,
+	}
 	gl.Uniformf(offset, 0.5, 0.5)
-	gl.Uniformf(frustum, 1.0)
-	gl.Uniformf(zNear, 1.0)
-	gl.Uniformf(zFar, 3.0)
-	
+	gl.UniformMatrix4fv(perspective, false, matrix[:])
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 	gl.DrawArrays(gl.TRIANGLES, 0, 36)
 Loop:
@@ -238,6 +231,9 @@ Loop:
 				if ev.Code == display.KeyEscape {
 					break Loop
 				}
+			case display.Damage:
+				gl.Clear(gl.COLOR_BUFFER_BIT)
+				gl.DrawArrays(gl.TRIANGLES, 0, 36)
 			case display.Resize:
 				gl.Viewport(0, 0, ev.Width, ev.Height)
 				gl.Clear(gl.COLOR_BUFFER_BIT)

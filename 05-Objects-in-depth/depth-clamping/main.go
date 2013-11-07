@@ -53,7 +53,12 @@ func main() {
 	}
 	
 	gl.ClearColor(0, 0, 0, 0)
+	gl.ClearDepth(1)
 	gl.Enable(gl.CULL_FACE)
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LESS)
+	gl.DepthMask(true)
+	gl.DepthRange(0, 1)
 	gl.CullFace(gl.BACK)
 	gl.FrontFace(gl.CW)
 	
@@ -198,22 +203,14 @@ func main() {
 	
 	pos, _ := gl.GetAttribLocation(prog, "position")
 	col, _ := gl.GetAttribLocation(prog, "color")
-	attr := gl.GenVertexArrays(2)
+	vao := gl.GenVertexArrays(1)
 	
 	// Object 1
-	gl.BindVertexArray(attr[0])
+	gl.BindVertexArray(vao[0])
 	gl.EnableVertexAttribArray(pos)
 	gl.EnableVertexAttribArray(col)
-	gl.VertexAttribPointer(pos, 3, gl.Float, false, 0, 0)
-	gl.VertexAttribPointer(col, 4, gl.Float, false, 0, 4 * 3 * 36)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, buf[1])
-	
-	// Object 2
-	gl.BindVertexArray(attr[1])
-	gl.EnableVertexAttribArray(pos)
-	gl.EnableVertexAttribArray(col)
-	gl.VertexAttribPointer(pos, 3, gl.Float, false, 0, 4 * 3 * 36 /2)
-	gl.VertexAttribPointer(col, 4, gl.Float, false, 0, 4 * 3 * 36 + 4 * 4 * 36/2)
+	gl.VertexAttribPointer(pos, 3, gl.Float32, false, 0, 0)
+	gl.VertexAttribPointer(col, 4, gl.Float32, false, 0, 4 * 3 * 36)
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, buf[1])
 	
 	offset, _ := gl.GetUniformLocation(prog, "offset")
@@ -231,8 +228,7 @@ func main() {
 		11: -1.0,
 	}
 	gl.UniformMatrix4fv(perspective, false, matrix[:])
-	gl.Clear(gl.COLOR_BUFFER_BIT)
-	gl.DrawArrays(gl.TRIANGLES, 0, 36)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 Loop:
 	for {
 		select {
@@ -241,6 +237,13 @@ Loop:
 			case display.KeyPress:
 				if ev.Code == display.KeyEscape {
 					break Loop
+				}
+				if ev.Code == display.KeySpace && ev.Down {
+					if gl.IsEnabled(gl.DEPTH_CLAMP) {
+						gl.Disable(gl.DEPTH_CLAMP)
+					} else {
+						gl.Enable(gl.DEPTH_CLAMP)
+					}
 				}
 			case display.Resize:
 				matrix[0] = frustum / (float32(ev.Width) / float32(ev.Height))
@@ -252,14 +255,15 @@ Loop:
 			win.WaitEvent()
 			continue
 		}
-		gl.Clear(gl.COLOR_BUFFER_BIT)
-		gl.BindVertexArray(attr[0])
-		gl.Uniformf(offset, 0, 0, 0)
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		
+		gl.Uniformf(offset, 0, 0, 0.5)
 		gl.DrawElements(gl.TRIANGLES, len(indices), gl.Uint16, 0)
 		
-		gl.BindVertexArray(attr[1])
 		gl.Uniformf(offset, 0, 0, -1)
-		gl.DrawElements(gl.TRIANGLES, len(indices), gl.Uint16, 0)
+		gl.DrawElementsBaseVertex(gl.TRIANGLES, len(indices),
+			gl.Uint16, 0, 36/2)
+		
 		win.Flip()
 	}
 }

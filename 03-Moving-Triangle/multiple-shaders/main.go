@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"time"
-	"math"
 	"aqwari.net/exp/gl"
 	"aqwari.net/exp/display"
 )
@@ -18,9 +17,13 @@ var vertShader = []byte(
 `#version 150
 
 in vec2 position;
-uniform vec2 offset;
+uniform float period;
+uniform float time;
 
 void main() {
+	float scale = 3.14159 * 2 / period;
+	float cur = mod(time, period);
+	vec2 offset = vec2(cos(cur * scale) / 2, sin(cur * scale) / 2);
 	gl_Position = vec4(position + offset, 0, 1);
 }
 `)
@@ -29,8 +32,17 @@ var fragShader = []byte(
 `#version 150
 
 out vec4 outColor;
+
+uniform float fragPeriod;
+uniform float time;
+
+const vec4 firstColor = vec4(1, 1, 1, 1);
+const vec4 secondColor = vec4(0, 1, 0, 1);
+
 void main() {
-	outColor = vec4(1,1,1,1);
+	float cur = mod(time, fragPeriod);
+	float curLerp = cur / fragPeriod;
+	outColor = mix(firstColor, secondColor, curLerp);
 }`)
 
 func main() {
@@ -92,11 +104,15 @@ func main() {
 	pos, _ := gl.GetAttribLocation(prog, "position")
 	gl.EnableVertexAttribArray(pos)
 	defer gl.DisableVertexAttribArray(pos)
-	gl.VertexAttribPointer(pos, 2, gl.Float, false, 0, 0)
+	gl.VertexAttribPointer(pos, 2, gl.Float32, false, 0, 0)
 	
-	offset, _ := gl.GetUniformLocation(prog, "offset")
+	glTime, _ := gl.GetUniformLocation(prog, "time")
+	glPeriod, _ := gl.GetUniformLocation(prog, "period")
+	glFragPeriod, _ := gl.GetUniformLocation(prog, "fragPeriod")
 	
 	clock := time.Tick(time.Second / 60)
+	gl.Uniformf(glPeriod, float32((time.Second * 4).Seconds()))
+	gl.Uniformf(glFragPeriod, float32((time.Second * 2).Seconds()))
 	start := time.Now()
 	
 	gl.Clear(gl.COLOR_BUFFER_BIT)
@@ -115,22 +131,9 @@ Loop:
 		default:
 		}
 		gl.Clear(gl.COLOR_BUFFER_BIT)
-		dx, dy := computeOffset(start)
-		gl.Uniformf(offset, dx, dy)
+		gl.Uniformf(glTime, float32(time.Since(start).Seconds()))
 		gl.DrawArrays(gl.TRIANGLES, 0, 3)
 		win.Flip()
 		win.CheckEvent()
 	}
-}
-
-func computeOffset(start time.Time) (dx float32, dy float32) {
-	π := float64(math.Pi)
-	period := time.Second * 2
-	scale := 2*π / period.Seconds()
-	elapsed := time.Since(start)
-	pos := (elapsed % period).Seconds()
-	
-	dx = float32(math.Cos(pos * scale) / 2)
-	dy = float32(math.Sin(pos * scale) / 2)
-	return
 }

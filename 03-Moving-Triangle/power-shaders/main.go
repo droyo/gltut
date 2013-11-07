@@ -95,7 +95,7 @@ func main() {
 	pos, _ := gl.GetAttribLocation(prog, "position")
 	gl.EnableVertexAttribArray(pos)
 	defer gl.DisableVertexAttribArray(pos)
-	gl.VertexAttribPointer(pos, 2, gl.Float, false, 0, 0)
+	gl.VertexAttribPointer(pos, 2, gl.Float32, false, 0, 0)
 	
 	glTime, _ := gl.GetUniformLocation(prog, "time")
 	glPeriod, _ := gl.GetUniformLocation(prog, "period")
